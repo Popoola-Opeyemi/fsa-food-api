@@ -56,8 +56,6 @@ func (s Server) getAuthorities(w http.ResponseWriter, r *http.Request) {
 func (s Server) getAuthority(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
-	// id := vars["id"]
-
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		http.Error(w, "Invalid authorityID", http.StatusBadRequest)

@@ -31,13 +31,14 @@ type (
 	Establishments struct {
 		LocalAuthorityBusinessID string `json:"LocalAuthorityBusinessID"`
 		RatingValue              string `json:"RatingValue"`
-		RatingKey                string `json:"RatingKey"`
+		SchemeType               string `json:"SchemeType"`
 	}
 	Meta struct {
 		ItemCount  int `json:"itemCount"`
 		TotalPages int `json:"totalPages"`
 		PageNumber int `json:"pageNumber"`
 		TotalCount int `json:"totalCount"`
+		SchemeType string
 	}
 	EstablishmentsResponse struct {
 		Meta           Meta             `json:"meta"`

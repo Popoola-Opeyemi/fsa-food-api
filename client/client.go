@@ -98,6 +98,7 @@ func GetLocalAuthority(id int) (model.EstablishmentsResponse, error) {
 
 		if resp.Meta.PageNumber == resp.Meta.TotalPages {
 			data.Meta = resp.Meta
+			data.Meta.SchemeType = resp.Establishments[0].SchemeType
 			break
 		}
 	}
