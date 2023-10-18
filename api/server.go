@@ -3,21 +3,23 @@ package api
 import (
 	"encoding/json"
 	"fsa-food-api/client"
+	"fsa-food-api/helpers"
 	"fsa-food-api/model"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
 
-type Server struct{}
+type Server struct {
+}
 
 func (s Server) Start() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/api", s.getAuthorities)
-	router.HandleFunc("/api/{authorityID}", s.getAuthority)
-	// router.HandleFunc("/api/localAuthorities/{localAuthorityID}/ratingPercentages",s.)
+	router.HandleFunc("/api/{id}", s.getAuthority)
 
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
 
@@ -52,21 +54,37 @@ func (s Server) getAuthorities(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) getAuthority(w http.ResponseWriter, r *http.Request) {
-	authorityRating := []model.AuthorityRating{
-		{Name: "5-star", Value: 22.41},
-		{Name: "4-star", Value: 43.13},
-		{Name: "3-star", Value: 12.97},
-		{Name: "2-star", Value: 1.54},
-		{Name: "1-star", Value: 17.84},
-		{Name: "Exempt", Value: 2.11},
+
+	vars := mux.Vars(r)
+	// id := vars["id"]
+
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Invalid authorityID", http.StatusBadRequest)
+		return
 	}
 
-	data, _ := json.Marshal(authorityRating)
+	resp, err := client.GetLocalAuthority(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	d, count, err := helpers.ProcessData(resp)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	percentage, err := helpers.GetPercentages(d, count)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	data, _ := json.Marshal(percentage)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(data)
-}
-
-func (s Server) getRatingPercentages(w http.ResponseWriter, r *http.Request) {
 
 }

@@ -25,15 +25,22 @@ type (
 	}
 
 	RatingPercentage struct {
-		Rating     string  `json:"rating"`
-		Percentage float64 `json:"percentage"`
+		Name  string  `json:"name"`
+		Value float64 `json:"value"`
+	}
+	Establishments struct {
+		LocalAuthorityBusinessID string `json:"LocalAuthorityBusinessID"`
+		RatingValue              string `json:"RatingValue"`
+		RatingKey                string `json:"RatingKey"`
+	}
+	Meta struct {
+		ItemCount  int `json:"itemCount"`
+		TotalPages int `json:"totalPages"`
+		PageNumber int `json:"pageNumber"`
+		TotalCount int `json:"totalCount"`
 	}
 	EstablishmentsResponse struct {
-		Establishments []struct {
-			FHRSID                   int    `json:"FHRSID"`
-			LocalAuthorityBusinessID string `json:"LocalAuthorityBusinessID"`
-			RatingValue              string `json:"RatingValue"`
-			RatingKey                string `json:"RatingKey"`
-		} `json:"establishments"`
+		Meta           Meta             `json:"meta"`
+		Establishments []Establishments `json:"establishments"`
 	}
 )

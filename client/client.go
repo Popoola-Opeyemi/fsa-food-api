@@ -2,11 +2,12 @@ package client
 
 import (
 	"encoding/json"
-	"fmt"
 	"fsa-food-api/model"
+	"strconv"
 
 	"io/ioutil"
 	"net/http"
+	"net/url"
 )
 
 func GetAuthorities() (model.FSAAuthorities, error) {
@@ -39,27 +40,35 @@ func GetAuthorities() (model.FSAAuthorities, error) {
 	return fsaAuthorities, nil
 }
 
-func GetLocalAuthoritymodel(id string) (model.EstablishmentsResponse, error) {
+func GetEstablishment(id int, pageNumber int) (model.EstablishmentsResponse, error) {
 	var response model.EstablishmentsResponse
 
-	url := fmt.Sprintf(`https://api.ratings.food.gov.uk/Establishments?
-	localAuthorityId=%s`, id)
+	baseURL := "https://api.ratings.food.gov.uk/Establishments"
 
-	req, err := http.NewRequest(http.MethodGet,
-		url, nil)
+	u, _ := url.Parse(baseURL)
+	q := u.Query()
+	q.Add("localAuthorityId", strconv.Itoa(id))
+
+	if pageNumber > 1 {
+		q.Add("pageNumber", strconv.Itoa(pageNumber))
+	}
+	u.RawQuery = q.Encode()
+
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
 		return response, err
 	}
 
-	req.Header.Set("x-api-version", "2")
+	req.Header.Add("x-api-version", "2")
 
-	res, err := http.DefaultClient.Do(req)
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		return response, err
 	}
-	defer res.Body.Close()
+	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return response, err
 	}
@@ -70,4 +79,29 @@ func GetLocalAuthoritymodel(id string) (model.EstablishmentsResponse, error) {
 	}
 
 	return response, nil
+}
+
+func GetLocalAuthority(id int) (model.EstablishmentsResponse, error) {
+
+	data := model.EstablishmentsResponse{}
+	var e []model.Establishments
+	pageNumber := 1
+
+	for {
+
+		resp, err := GetEstablishment(id, pageNumber)
+		if err != nil {
+			return model.EstablishmentsResponse{}, err
+		}
+		e = append(e, resp.Establishments...)
+		pageNumber++
+
+		if resp.Meta.PageNumber == resp.Meta.TotalPages {
+			data.Meta = resp.Meta
+			break
+		}
+	}
+	data.Establishments = e
+	return data, nil
+
 }
