@@ -1,8 +1,10 @@
 package helpers
 
 import (
+	"fmt"
 	"fsa-food-api/model"
 	"sort"
+	"strconv"
 	"sync"
 )
 
@@ -91,9 +93,10 @@ func GetPercentages(ratings []model.Ratings, count int) []model.RatingPercentage
 
 	for idx, itm := range ratings {
 		percentage := float64(itm.Count) / float64(count) * 100
+		val, _ := strconv.ParseFloat(fmt.Sprintf("%.3f", percentage), 64)
 		percentages[idx] = model.RatingPercentage{
 			Name:  itm.Rating,
-			Value: percentage,
+			Value: val,
 		}
 	}
 
