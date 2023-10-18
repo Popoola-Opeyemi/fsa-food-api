@@ -74,11 +74,7 @@ func (s Server) getAuthority(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	percentage, err := helpers.GetPercentages(d, count)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	percentage := helpers.GetPercentages(d, count)
 
 	data, _ := json.Marshal(percentage)
 	w.Header().Set("Content-Type", "application/json")
